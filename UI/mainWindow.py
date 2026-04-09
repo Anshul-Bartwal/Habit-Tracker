@@ -1,25 +1,9 @@
 import tkinter as tk
 # for storing all tasks till i dont have backend
-tasksArray=[]
+habitsArray=[]
 # primitve method
-def addTask(newTask):
-    task = tk.Frame(root,bg="lightgray")
 
-    taskName=tk.Label(task,text=newTask)
-    taskName.pack(side="left",padx=5)
-
-    doneBtn=tk.Button(task,text="done")
-    upBtn=tk.Button(task,text="up")
-    downBtn=tk.Button(task,text="down")
-    delBtn=tk.Button(task,text="del")
-
-    doneBtn.pack(side="left",padx=3,pady=2)
-    upBtn.pack(side="left",padx=3,pady=2)
-    downBtn.pack(side="left",padx=3,pady=2)
-    delBtn.pack(side="left",padx=3,pady=2) 
-    return task
-    
-class Task:
+class Habit:
     def __init__(self, parent, text):
         self.frame = tk.Frame(parent)
 
@@ -29,30 +13,41 @@ class Task:
         self.delete_btn = tk.Button(self.frame, text="X", command=self.delete)
         self.delete_btn.pack(side="right")
 
-        self.details_btn=tk.Button(self.frame,text="details",command=self.details)
+        self.details_btn=tk.Button(self.frame,text="details",command=self.open_details)
+        self.details_btn.pack(side='right')
 
     def pack(self):
         self.frame.pack(fill="x")
 
     def delete(self):
         self.frame.destroy()
-    def details(self):
-        pass
-#when addTask btn is clicked this func runs which adds the task to tasks section 
-def handleAddTask():
+    def open_details(self):
+        details=tk.Toplevel(root)
+        details.title(f"Habit: {self.text}")
+        details.geometry('300x200')
+
+        tk.Label(details, text="Details go here").pack(pady=20)
+        # new details with graphs and all to come later till that time it is placeholder here
+
+        details.grab_set() # make it so that input connects to this window and other windows go out of pur input scope
+        details.transient(root) # appear above root
+#when addHabit btn is clicked this func runs which adds the habit to habits section 
+def handleAddHabit():
     val = textInput.get("1.0", "end-1c")  # get text properly
     
     if val.strip() != "":
-        tasksArray.append(Task(root,val))
-        tasksArray[-1].pack()
+        habitsArray.append(Habit(root,val))
+        habitsArray[-1].pack()
 
     textInput.delete("1.0", "end")  # clear input
 
 root=tk.Tk()
 root.geometry('400x400')
+streak_btn=tk.Button(root,text="Streaks",width=6,height=1)
+streak_btn.pack()
 textInput=tk.Text(root,height=10)
 textInput.pack()
-add=tk.Button(root,text="Add Task",command=handleAddTask, width=8, height=2, font=('Arial', 14))
+add=tk.Button(root,text="Add Habit",command=handleAddHabit, width=8, height=2, font=('Arial', 14))
 add.pack()
 
 
