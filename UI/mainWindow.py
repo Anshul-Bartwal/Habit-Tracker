@@ -116,7 +116,7 @@ class HabitTracker(tk.Tk):
 
 
         tk.Label(bar,text="Add a Habit",background="#ffffff").pack(anchor="w",pady=(0,8)) # pady=(top,bottom)
-        input_row=tk.Label(bar,bg="#ffffff")
+        input_row=tk.Frame(bar,bg="#ffffff")
         input_row.pack(fill='x')
         # cuz we dont need inputrows in the child we didnt do it as self.input_row
         # -----------------------------we are inside input row---------------------------------
@@ -133,11 +133,17 @@ class HabitTracker(tk.Tk):
         tk.Label(days_row,text="Commitment",background="#ffffff",fg="#000000").pack()
         self.days_var=tk.IntVar(value=10)
         self.days_label=tk.Label(days_row,text="10-Days")
+
         self.days_label.pack()
 
 
-        # scale/slider 1-100 doesnt show value changes the daysLabel according to days 
-        self.day_scale=tk.Scale(days_row,orient="horizontal",from_=1,to=100,variable=self.days_var,showvalue="False",command=lambda v: self.days_label.config(text=f"{v} Days"))#,background=lambda v:self.handle_gradient(v)
+        # scale/slider 1-100 doesnt show value changes the daysLabel according to days
+        self.day_scale = tk.Scale(
+                        days_row, orient="horizontal", from_=1, to=100,
+                        variable=self.days_var, showvalue=False,
+                        command=lambda v: self.days_label.config(
+                            text=f"{v} Days", bg=self.handle_gradient(v))
+                    )
         self.day_scale.pack(fill='x')
     def _build_Habits_Container(self): #scroll area
         # -----scroll section and canvas for all the habits section 
@@ -179,7 +185,7 @@ class HabitTracker(tk.Tk):
             card.pack(fill="x", pady=4)
 
             self.name_entry.delete(0, "end")
-    def handle_gradient(value,min_val=1,max_val=100):
+    def handle_gradient(self,value,min_val=1,max_val=100):
         value=int(value)
         t = (value - min_val) / (max_val - min_val)  # 0.0 to 1.0
         r = int(234 * (1 - t) + 22 * t)
