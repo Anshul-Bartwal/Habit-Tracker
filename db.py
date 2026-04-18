@@ -7,7 +7,6 @@ load_dotenv()
 client = MongoClient(os.getenv("MONGO_URI"),tlsAllowInvalidCertificates=True)
 # make a new table in client
 db=client["habit_tracker"]
-print("yotest")
 habit_cols=db["habits"]
 log_cols=db["logs"]
 
@@ -74,10 +73,5 @@ def load_habits():
 def delete_habit(habit_id):
     habit_cols.delete_one({"_id":habit_id})
 
-# from bson import ObjectId
-result =load_habits()
-# ann array ofobject 
-print(load_habits(),sep='\n')
-delete_habit(result[0].get("_id"))
 
 

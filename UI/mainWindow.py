@@ -2,16 +2,22 @@ import tkinter as tk
 from tkinter import ttk
 from datetime import date,timedelta
 # for storing all tasks till i dont have backend
-habitsArray=[]
-# primitve method
+
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from db import save_habit,load_habits,update_check,delete_habit 
+
 
 class HabitCard(tk.Frame):
-    def __init__(self,parent,text,days):
+    def __init__(self,parent,text,days,habit_id):
         super().__init__(parent,background="#ffffff",bd=1,relief='solid',padx=10,pady=8)
         self.text=text
         self.days=days
         self.start_date=date.today()
         self.on_delete = lambda c=self:c.destroy()
+        self.habit_id=habit_id
 
 
         self.checkVar={}
@@ -179,7 +185,8 @@ class HabitTracker(tk.Tk):
             days=10
         self.name_entry.delete(0,'end')
         if(habitText.strip() != ""):
-            card=HabitCard(self.card_container,habitText,days)
+            habit_id=save_habit(name=habitText,days=days)
+            card=HabitCard(self.card_container,habitText,days,habit_id)
             print(habitText)
             
             card.pack(fill="x", pady=4)
@@ -193,22 +200,7 @@ class HabitTracker(tk.Tk):
         b = int(8 * (1 - t) + 74 * t)
         return f"#{r:02x}{g:02x}{b:02x}"
 
-# a json type dict : 
-'''for Habit object
-    {taskName:{
-        commitedTime:"time till which user has asked to commit the habit",
-        timeElapsed:[days user has done the habit] #usefull for the checkboxes,
-        streak:{
-            currentStreak:currentStreak,
-            longestStreak:longestStreak
-            }
-        },
-        priority:updated using the btns (num and pri are directly proportional)
 
-
-
-    }
-'''
 app=HabitTracker()
 app.mainloop()
 
