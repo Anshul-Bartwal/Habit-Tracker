@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 from datetime import date,timedelta
-# for storing all tasks till i dont have backend
 import threading 
 
 import sys
@@ -9,7 +8,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from db import save_habit,load_habits,update_check,delete_habit 
-
+from analytics import AnalyticsWindow
 
 class HabitCard(tk.Frame):
     def __init__(self,parent,text,days,habit_id):
@@ -131,7 +130,7 @@ class HabitTracker(tk.Tk):
         self.minsize(400,400)
         self._build_input_bar()
         self._build_Habits_Container()
-        self._load_prev_habits()
+        # self._load_prev_habits()
 
     
     def _build_input_bar (self):
@@ -141,6 +140,7 @@ class HabitTracker(tk.Tk):
 
 
         tk.Label(bar,text="Add a Habit",background="#ffffff").pack(anchor="w",pady=(0,8)) # pady=(top,bottom)
+        tk.Button(bar,text="Analytics",command=self._open_analytics,cursor='hand2',relief='solid',bd=1).pack(pady=(8,0))
         input_row=tk.Frame(bar,bg="#ffffff")
         input_row.pack(fill='x')
         # cuz we dont need inputrows in the child we didnt do it as self.input_row
@@ -170,6 +170,7 @@ class HabitTracker(tk.Tk):
                             text=f"{v} Days", bg=self.handle_gradient(v))
                     )
         self.day_scale.pack(fill='x')
+    
     def _build_Habits_Container(self): #scroll area
         # -----scroll section and canvas for all the habits section 
         wrapper=tk.Frame(self,bg="#d9fdff") 
@@ -196,6 +197,7 @@ class HabitTracker(tk.Tk):
                 self._canvas_window, width=e.width))
 
         self._canvas=canvas
+    
     def _load_prev_habits(self):
         habits=load_habits()
         for habit in habits:
@@ -246,7 +248,8 @@ class HabitTracker(tk.Tk):
         b = int(8 * (1 - t) + 74 * t)
         return f"#{r:02x}{g:02x}{b:02x}"
 
-
+    def _open_analytics(self):
+        AnalyticsWindow(self)
 app=HabitTracker()
 app.mainloop()
 
