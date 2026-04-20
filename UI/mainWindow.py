@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from datetime import date,timedelta
 # for storing all tasks till i dont have backend
+import threading 
 
 import sys
 import os
@@ -16,8 +17,10 @@ class HabitCard(tk.Frame):
         self.text=text
         self.days=days
         self.start_date=date.today()
-        self.on_delete = lambda c=self:c.destroy()
         self.habit_id=habit_id
+
+        self._on_delete=self._delete()
+
 
 
         self.checkVar={}
@@ -80,20 +83,29 @@ class HabitCard(tk.Frame):
             cb=tk.Checkbutton(inner,variable=var,
                               bg="#ffffff",
                               activebackground="#d1fae5",
-                              selectcolor="#51ff32",command=self._oncheck)
+                              selectcolor="#51ff32",command=lambda k=key,v=var:self._oncheck(k,v.get()))
             cb.grid(row=row,column=col)
             if day > today:
                 cb.configure(state='disabled')
         inner.update_idletasks()
         canvas.configure(scrollregion=canvas.bbox("all"))
-
-    def _oncheck(self):
+    def _refresh_ui(self):
         done=sum(v.get() for v in self.checkVar.values())
         self.progress_bar["value"]=done
         self.progress_label.config(text=f"{done}/{self.days}")
-        self.progress_label.config(text=f"{done}/{self.days}")
         streak=self._calc_streak()
         self.streak_label.config(text=f' {streak} days Streak')
+
+    def _oncheck(self,dateStr,checked):
+        # datesr and checked are only used for saveing so if want to refresh the UI  we can just pass None None :)
+        # so instead we can just transfer the refesh ui code into a new function
+        self._refresh_ui()
+        def save():
+            if self.habit_id is None:
+                return
+            update_check(habit_id=self.habit_id,date_str=dateStr,checked=checked,days=self.days)
+        threading.Thread(target=save,daemon=True).start()
+    
     def _calc_streak(self):
         today = date.today()
         streak = 0
@@ -105,7 +117,12 @@ class HabitCard(tk.Frame):
             else:
                 break
         return streak
-
+    def _delete(self):
+        def remove():
+            if self.habit_id:
+                delete_habit(self.habit_id)
+        threading.Thread(target=self._delete,daemon=True).start()
+        self.destroy()
 class HabitTracker(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -114,6 +131,8 @@ class HabitTracker(tk.Tk):
         self.minsize(400,400)
         self._build_input_bar()
         self._build_Habits_Container()
+        self._load_prev_habits()
+
     
     def _build_input_bar (self):
         bar = tk.Frame(self, bg="#ffffff",bd=1, relief="solid",
@@ -177,6 +196,24 @@ class HabitTracker(tk.Tk):
                 self._canvas_window, width=e.width))
 
         self._canvas=canvas
+    def _load_prev_habits(self):
+        habits=load_habits()
+        for habit in habits:
+            habit_card=HabitCard(self.card_container,
+                                 text=habit.get('name'),
+                                 days=habit.get('days'),
+                                 habit_id=habit.get('_id'))
+            habit_card.pack(fill="x",pady=4)
+
+            # for checkboxes
+            logs=habit.get('logs',{})
+
+            for date_str,checked in logs.items():
+                if date_str in habit_card.checkVar and checked: # check if date in our checkvar ie range it has range from start day to end day date and if its checked from db
+                    habit_card.checkVar[date_str].set(True)
+
+            habit_card._refresh_ui()
+
     def _handle_add(self):
         habitText=self.name_entry.get()
         try:
@@ -184,14 +221,23 @@ class HabitTracker(tk.Tk):
         except ValueError :
             days=10
         self.name_entry.delete(0,'end')
-        if(habitText.strip() != ""):
+        if(habitText.strip() == ""):
+            return
+        card=HabitCard(self.card_container,habitText,days,habit_id=None)
+        print(habitText)
+        card.pack(fill="x", pady=4)
+        self.name_entry.delete(0, "end")
+        def save_in_background():
+            print("starting to save in database")
             habit_id=save_habit(name=habitText,days=days)
-            card=HabitCard(self.card_container,habitText,days,habit_id)
-            print(habitText)
-            
-            card.pack(fill="x", pady=4)
-
-            self.name_entry.delete(0, "end")
+            card.habit_id=habit_id
+            print("Added in database")
+        
+        
+        thread=threading.Thread(target=save_in_background)
+        thread.daemon=True #if window closes the thread dies too
+        thread.start()
+        
     def handle_gradient(self,value,min_val=1,max_val=100):
         value=int(value)
         t = (value - min_val) / (max_val - min_val)  # 0.0 to 1.0
