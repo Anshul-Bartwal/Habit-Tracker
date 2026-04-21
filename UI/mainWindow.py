@@ -11,11 +11,15 @@ from db import save_habit,load_habits,update_check,delete_habit
 from analytics import AnalyticsWindow
 
 class HabitCard(tk.Frame):
-    def __init__(self,parent,text,days,habit_id):
+    def __init__(self,parent,text,days,habit_id,start_date=None):
         super().__init__(parent,background="#ffffff",bd=1,relief='solid',padx=10,pady=8)
         self.text=text
         self.days=days
-        self.start_date=date.today()
+        # self.start_date=date.today()
+        if start_date:
+            self.start_date = date.fromisoformat(start_date)
+        else:
+            self.start_date = date.today()
         self.habit_id=habit_id
 
         self._on_delete=self._delete
@@ -205,7 +209,9 @@ class HabitTracker(tk.Tk):
             habit_card=HabitCard(self.card_container,
                                  text=habit.get('name'),
                                  days=habit.get('days'),
-                                 habit_id=habit.get('_id'))
+                                 habit_id=habit.get('_id'),
+                                 start_date=habit.get('start_date'))
+            
             habit_card.pack(fill="x",pady=4)
 
             # for checkboxes
