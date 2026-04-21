@@ -18,11 +18,12 @@ class HabitCard(tk.Frame):
         self.start_date=date.today()
         self.habit_id=habit_id
 
-        self._on_delete=self._delete()
+        self._on_delete=self._delete
 
 
 
         self.checkVar={}
+        
         self._build_header()
         self._build_progress_bar()
         self._build_checkboxes()
@@ -37,7 +38,7 @@ class HabitCard(tk.Frame):
 
         del_btn=tk.Button(header,text="×", font=("Arial", 12),
                             bg="#ffffff", relief="flat", cursor="hand2",
-                            command=self.on_delete)
+                            command=self._on_delete)
         del_btn.pack(side="right")
 
         # streak label
@@ -130,7 +131,7 @@ class HabitTracker(tk.Tk):
         self.minsize(400,400)
         self._build_input_bar()
         self._build_Habits_Container()
-        # self._load_prev_habits()
+        self._load_prev_habits()
 
     
     def _build_input_bar (self):
