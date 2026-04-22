@@ -3,3 +3,7 @@
 __pycache__
 tempCodeRunnerFile.py
 
+seed.py
+est.py
+*.docx
+*.pptx
